@@ -6,6 +6,23 @@ import (
 	"time"
 )
 
+type WorkerPool struct {
+	tasks chan net.Conn
+}
+
+func NewWorkerPool(size int) *WorkerPool {
+	pool := &WorkerPool{tasks: make(chan net.Conn, 100)}
+	for i := 0; i < size; i++ {
+		go pool.worker()
+	}
+	return pool
+}
+func (p *WorkerPool) worker() {
+	for conn := range p.tasks {
+		handleConnection(conn)
+	}
+}
+
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
 	conn.SetReadDeadline(time.Now().Add(10 * time.Second))
@@ -17,7 +34,7 @@ func handleConnection(conn net.Conn) {
 			return
 		}
 		fmt.Printf("Recieved: %s", buffer[:n])
-		conn.Write([]byte("Message recieved\n"))
+		conn.Write([]byte("Lubie placki\n"))
 	}
 }
 
@@ -28,6 +45,10 @@ func main() {
 		return
 	}
 	defer listener.Close()
+
+	// Initialize Worker pool
+	pool := NewWorkerPool(10)
+
 	fmt.Println("Server listening on :8080")
 	// Equivalent to while(true)
 	for {
@@ -36,7 +57,6 @@ func main() {
 			fmt.Println("Error accepting", err)
 			continue
 		}
-
-		go handleConnection(conn)
+		pool.tasks <- conn
 	}
 }
