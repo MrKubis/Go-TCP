@@ -1,0 +1,14 @@
+# Binarne pliki wyjściowe
+bin/
+dist/
+
+# Zależności vendorowe (opcjonalnie)
+vendor/
+
+# Env z sekretami
+.env
+*.local
+
+# IDE
+.idea/
+.vscode/
